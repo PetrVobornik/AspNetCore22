@@ -3,6 +3,12 @@
 @{
 }
 
+@if (Model.Input == null)
+{
+    <p>Stránka nenalezena</p>
+    return;
+}
+
 <h1>@(Model.ItemId == 0 ? "Nová položka blogu" : "Úprava položky blogu")</h1>
 
 <form method="post">
@@ -19,21 +25,29 @@
         <label asp-for="Input.Datum"></label>
         <span asp-validation-for="Input.Datum" class="text-danger"></span>
     </div>
+    <div class="form-check mb-3">
+        <input asp-for="Input.Pripnuto" class="form-check-input" />
+        <label asp-for="Input.Pripnuto"></label>
+        <span asp-validation-for="Input.Pripnuto" class="text-danger"></span>
+    </div>
     <div class="form-floating mb-3">
         <input asp-for="Input.Perex" class="form-control" placeholder="." />
         <label asp-for="Input.Perex"></label>
         <span asp-validation-for="Input.Perex" class="text-danger"></span>
     </div>
     <div class="form-floating mb-3">
-        <textarea asp-for="Input.Prispevek" class="form-control" placeholder="." style="height: 20rem;"></textarea>
+        <textarea asp-for="Input.Prispevek" class="form-control" placeholder="." style="height: 10rem;"></textarea>
         <label asp-for="Input.Prispevek"></label>
         <span asp-validation-for="Input.Prispevek" class="text-danger"></span>
     </div>
     <div class="row">
         <button type="submit" class="col btn btn-lg btn-primary">Uložit</button>
-        <button type="submit" class="col btn btn-lg btn-danger"
-                onclick="$('#BlogId').val(-1)">Vymazat</button>
-        <a href="/blog" class="col btn btn-lg btn-warning">Zpět</a>
+        @if (Model.ItemId > 0)
+        {
+            <button type="submit" class="col btn btn-lg btn-danger mx-3"
+                    onclick="$('#BlogId').val(-1)">Vymazat</button>
+        }
+        <a href="/blog@(Model.ItemId > 0 ? $"/{Model.ItemId}" : "")" class="col btn btn-lg btn-warning">Zpět</a>
     </div>
 </form>
 

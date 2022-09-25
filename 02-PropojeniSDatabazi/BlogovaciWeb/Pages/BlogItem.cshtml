@@ -9,7 +9,7 @@
 }
 
 <h1>@Model.Blog.Nadpis</h1>
-<p class="mb-5">@Model.Blog.Datum.ToString("dd.MM.yyyy")</p>
+<p class="mb-5">@Model.Blog.Datum.ToString("dd.MM.yyyy")@(Model.Blog.Pripnuto ? " *" : "")</p>
 
 <p>@Model.Blog.Prispevek</p>
 

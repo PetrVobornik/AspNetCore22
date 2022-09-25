@@ -18,7 +18,10 @@ namespace BlogovaciWeb.Pages
 
         public async Task OnGetAsync()
         {
-            BlogItems = await DB.Blog.OrderByDescending(x => x.Datum).ToListAsync();
+            BlogItems = await DB.Blog
+                .OrderByDescending(x => x.Pripnuto)
+                .ThenByDescending(x => x.Datum)
+                .ToListAsync();
         }
     }
 }

@@ -33,6 +33,7 @@ namespace BlogovaciWeb.Areas.Editor.Pages
             if (Input == null || !TryValidateModel(Input))
                 return;
 
+            bool smazat = false;
             if (ItemId == 0)
                 await DB.AddAsync(Input);
             else if (Input.Id > 0)
@@ -41,11 +42,12 @@ namespace BlogovaciWeb.Areas.Editor.Pages
             {
                 Input.Id = ItemId;
                 DB.Remove(Input);
+                smazat = true;
             }
 
             await DB.SaveChangesAsync();
 
-            Response.Redirect("/blog");
+            Response.Redirect(smazat ? "/blog" : $"/blog/{Input.Id}");
         }
     }
 }

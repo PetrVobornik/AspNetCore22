@@ -6,13 +6,17 @@
 <div class="list-group">
     @foreach (var item in Model.BlogItems)
     {
-        <a href="/blog/@item.Id" class="list-group-item list-group-item-action">
+        <a href="/blog/@item.Id" class="list-group-item list-group-item-action position-relative">
             <h2>@item.Nadpis</h2>
             <p>@item.Datum.ToString("dd.MM.yyyy")</p>
             <p>@item.Perex</p>
-        </a>        
+            @if (item.Pripnuto)
+            {
+                <span class="position-absolute top-0 end-0 m-3"><img src="~/img/pin-icon.svg" style="height: 1.5rem; width: 1.5rem;" /></span>
+            }
+        </a>
     }
-
+    
 </div>
 
 

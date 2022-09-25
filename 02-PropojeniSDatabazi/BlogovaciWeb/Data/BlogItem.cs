@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace BlogovaciWeb.Data;
 
@@ -18,5 +19,8 @@ public record BlogItem
 
     [DataType(DataType.MultilineText), Display(Name = "Text příspěvku")]
     public string Prispevek { get; set; }
+
+    [Display(Name = "Připnuto")]
+    public bool Pripnuto { get; set; }
 
 }
