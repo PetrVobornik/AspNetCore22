@@ -1,0 +1,42 @@
+﻿@page "/editor/blog/{ItemId:int}"
+@model BlogovaciWeb.Areas.Editor.Pages.BlogItemEditModel
+@{
+}
+
+<h1>@(Model.ItemId == 0 ? "Nová položka blogu" : "Úprava položky blogu")</h1>
+
+<form method="post">
+    <hr />
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <input type="hidden" asp-for="Input.Id" id="BlogId" />
+    <div class="form-floating mb-3">
+        <input asp-for="Input.Nadpis" class="form-control" aria-required="true" placeholder="." />
+        <label asp-for="Input.Nadpis"></label>
+        <span asp-validation-for="Input.Nadpis" class="text-danger"></span>
+    </div>
+    <div class="form-floating mb-3">
+        <input asp-for="Input.Datum" class="form-control" aria-required="true" placeholder="." />
+        <label asp-for="Input.Datum"></label>
+        <span asp-validation-for="Input.Datum" class="text-danger"></span>
+    </div>
+    <div class="form-floating mb-3">
+        <input asp-for="Input.Perex" class="form-control" placeholder="." />
+        <label asp-for="Input.Perex"></label>
+        <span asp-validation-for="Input.Perex" class="text-danger"></span>
+    </div>
+    <div class="form-floating mb-3">
+        <textarea asp-for="Input.Prispevek" class="form-control" placeholder="." style="height: 20rem;"></textarea>
+        <label asp-for="Input.Prispevek"></label>
+        <span asp-validation-for="Input.Prispevek" class="text-danger"></span>
+    </div>
+    <div class="row">
+        <button type="submit" class="col btn btn-lg btn-primary">Uložit</button>
+        <button type="submit" class="col btn btn-lg btn-danger"
+                onclick="$('#BlogId').val(-1)">Vymazat</button>
+        <a href="/blog" class="col btn btn-lg btn-warning">Zpět</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

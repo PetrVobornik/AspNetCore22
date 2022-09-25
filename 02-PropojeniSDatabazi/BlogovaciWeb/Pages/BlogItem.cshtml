@@ -1,0 +1,20 @@
+﻿@page "/blog/{ItemId:int}"
+@model BlogovaciWeb.Pages.BlogItemModel
+@{
+}
+
+@if (Model.Blog == null) {
+    <p>Stránka nenalezena</p>
+    return;
+}
+
+<h1>@Model.Blog.Nadpis</h1>
+<p class="mb-5">@Model.Blog.Datum.ToString("dd.MM.yyyy")</p>
+
+<p>@Model.Blog.Prispevek</p>
+
+<p>
+    <a href="/blog" class="btn btn-outline-primary mt-5 float-start">Zpět</a>
+    <a href="/editor/blog/@Model.Blog.Id" class="btn btn-outline-primary mt-5 float-end">Upravit</a>
+
+</p>

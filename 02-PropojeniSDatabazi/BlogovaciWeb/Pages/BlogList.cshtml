@@ -1,0 +1,19 @@
+﻿@page "/blog"
+@model BlogovaciWeb.Pages.BlogListModel
+@{
+}
+
+<div class="list-group">
+    @foreach (var item in Model.BlogItems)
+    {
+        <a href="/blog/@item.Id" class="list-group-item list-group-item-action">
+            <h2>@item.Nadpis</h2>
+            <p>@item.Datum.ToString("dd.MM.yyyy")</p>
+            <p>@item.Perex</p>
+        </a>        
+    }
+
+</div>
+
+
+<a href="/editor/blog/0" class="btn btn-outline-primary">Přidat</a>
