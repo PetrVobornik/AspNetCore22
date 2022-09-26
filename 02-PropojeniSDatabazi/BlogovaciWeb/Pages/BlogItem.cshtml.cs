@@ -1,6 +1,7 @@
 using BlogovaciWeb.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 
 namespace BlogovaciWeb.Pages
 {
@@ -21,7 +22,9 @@ namespace BlogovaciWeb.Pages
 
         public async Task OnGetAsync()
         {
-            Blog = await DB.Blog.FindAsync(ItemId);
+            Blog = await DB.Blog
+                .Include(nameof(BlogItem.Autor))
+                .FirstOrDefaultAsync(x => x.Id == ItemId);
         }
     }
 }

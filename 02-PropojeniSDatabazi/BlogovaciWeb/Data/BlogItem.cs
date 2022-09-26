@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using Microsoft.AspNetCore.Identity;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
 namespace BlogovaciWeb.Data;
@@ -22,5 +23,10 @@ public record BlogItem
 
     [Display(Name = "Připnuto")]
     public bool Pripnuto { get; set; }
+
+
+    public IdentityUser Autor { get; set; }
+    
+    public string? AutorId { get; set; }
 
 }

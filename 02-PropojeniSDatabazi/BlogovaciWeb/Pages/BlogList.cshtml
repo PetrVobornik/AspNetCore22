@@ -1,6 +1,7 @@
 ﻿@page "/blog"
 @model BlogovaciWeb.Pages.BlogListModel
 @{
+    ViewData["Title"] = "Blog";
 }
 
 <div class="list-group">
@@ -8,7 +9,7 @@
     {
         <a href="/blog/@item.Id" class="list-group-item list-group-item-action position-relative">
             <h2>@item.Nadpis</h2>
-            <p>@item.Datum.ToString("dd.MM.yyyy")</p>
+            <p>Napsal: @(item.Autor?.UserName ?? "?") (@item.Datum.ToString("dd.MM.yyyy"))</p>
             <p>@item.Perex</p>
             @if (item.Pripnuto)
             {

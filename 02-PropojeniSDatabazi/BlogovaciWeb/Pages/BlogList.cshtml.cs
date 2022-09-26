@@ -19,6 +19,7 @@ namespace BlogovaciWeb.Pages
         public async Task OnGetAsync()
         {
             BlogItems = await DB.Blog
+                .Include(nameof(BlogItem.Autor))
                 .OrderByDescending(x => x.Pripnuto)
                 .ThenByDescending(x => x.Datum)
                 .ToListAsync();
