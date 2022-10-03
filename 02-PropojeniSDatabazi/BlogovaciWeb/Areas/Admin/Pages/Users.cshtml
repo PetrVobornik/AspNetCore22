@@ -1,0 +1,57 @@
+﻿@page
+@model BlogovaciWeb.Areas.Admin.Pages.UsersModel
+@{
+}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">User name</th>
+            <th scope="col">E-mail</th>
+            <th scope="col">Role</th>
+            <th scope="col">Ban</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model.UsersList)
+        {
+            <tr>
+                <th scope="row">
+                    @user.UserName
+                </th>
+                <td>
+                    @user.Email
+                </td>
+                <td>
+                    <form method="post" asp-page-handler="role">
+                        <input type="hidden" name="user" value="@user.UserName" />
+                        <input type="hidden" name="role" value="" />
+                        <button type="submit" onclick="$(this).parent('form').find('input[name=\'role\']').val('@(Seed.EditorRoleName)')"
+                            class="btn btn-@(user.Roles.Contains(Seed.EditorRoleName) ? "primary" : "light")">Editor</button>
+                        <button type="submit" onclick="$(this).parent('form').find('input[name=\'role\']').val('@(Seed.AdminRoleName)')"
+                            class="btn btn-@(user.Roles.Contains(Seed.AdminRoleName) ? "danger" : "light")">Admin</button>
+                    </form>
+                </td>
+                <td>
+                    <form method="post" asp-page-handler="ban">
+                        <input type="hidden" name="user" value="@user.UserName" />
+                        <input type="hidden" name="ban" value="" />
+                        @if ((user.BanEnds ?? DateTimeOffset.MinValue) < DateTimeOffset.MaxValue)
+                        {
+                            <button type="submit" onclick="$(this).parent('form').find('input[name=\'ban\']').val('kick')"
+                                class="btn btn-warning">Kick</button>
+                            <button type="submit" onclick="$(this).parent('form').find('input[name=\'ban\']').val('ban')"
+                                class="btn btn-danger">Ban</button>
+                        }
+                        @if ((user.BanEnds ?? DateTimeOffset.MinValue) > DateTimeOffset.Now)
+                        {
+                            <button type="submit" onclick="$(this).parent('form').find('input[name=\'ban\']').val('cancel')"
+                                class="btn btn-success">Pustit</button>
+                        }
+                        <p>@user.BanEnds</p>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

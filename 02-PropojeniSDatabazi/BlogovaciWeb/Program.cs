@@ -1,3 +1,4 @@
+using BlogovaciWeb.Code;
 using BlogovaciWeb.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +11,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddDefaultIdentity<IdentityUser>(options =>
+builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
 {
     options.SignIn.RequireConfirmedAccount = true;
     options.Password.RequiredLength = 3;
@@ -19,11 +20,31 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
     options.Password.RequireNonAlphanumeric = false;
     options.Password.RequireDigit = false;
 })
-    .AddEntityFrameworkStores<ApplicationDbContext>();
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders()
+    .AddDefaultUI();
+
+builder.Services.Configure<SecurityStampValidatorOptions>(options => {
+    options.ValidationInterval = TimeSpan.FromSeconds(10);
+});
+
+builder.Services.ConfigureApplicationCookie(options => {
+    options.SlidingExpiration = true;
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(20);
+});
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("EditorPolicy", p => p.RequireRole(Seed.EditorRoleName));
+    options.AddPolicy("AdminPolicy", p => p.RequireRole(Seed.AdminRoleName));
+});
 
 builder.Services.AddRazorPages(options => {
-    options.Conventions.AuthorizeAreaFolder("Editor", "/");
+    options.Conventions.AuthorizeAreaFolder("Editor", "/", "EditorPolicy");
+    options.Conventions.AuthorizeAreaFolder("Admin", "/", "AdminPolicy");
 });
+
+builder.Services.AddTransient<Seed>();
 
 var app = builder.Build();
 
@@ -48,5 +69,12 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapRazorPages();
+
+var scopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
+using (var scope = scopeFactory.CreateScope())
+{
+    var seed = scope.ServiceProvider.GetRequiredService<Seed>();
+    seed.Initialize();
+}
 
 app.Run();
