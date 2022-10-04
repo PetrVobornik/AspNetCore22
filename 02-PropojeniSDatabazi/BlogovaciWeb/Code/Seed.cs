@@ -47,8 +47,8 @@ namespace BlogovaciWeb.Code
                 await userManager.CreateAsync(adminUser, "123456");
             }
 
-            // Přidání role admina
-            var isAdmin = await userManager.IsInRoleAsync(adminUser, AdminRoleName);
+            // Přidání role admina uživateli
+            bool isAdmin = await userManager.IsInRoleAsync(adminUser, AdminRoleName);
             if (!isAdmin)
                 await userManager.AddToRoleAsync(adminUser, AdminRoleName);
         }

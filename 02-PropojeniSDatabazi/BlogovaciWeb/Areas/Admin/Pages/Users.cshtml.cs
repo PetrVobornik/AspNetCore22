@@ -13,7 +13,7 @@ namespace BlogovaciWeb.Areas.Admin.Pages
         readonly UserManager<IdentityUser> userManager;
         readonly RoleManager<IdentityRole> roleManager;
 
-        public List<UserDataForAdmin> UsersList { get; set; }
+        public List<UsersDataForAdmin> UsersList { get; set; }
 
         public UsersModel(ApplicationDbContext db,
                     UserManager<IdentityUser> userManager,
@@ -38,8 +38,9 @@ namespace BlogovaciWeb.Areas.Admin.Pages
                 if (hasRole)
                 {
                     if (role != Seed.AdminRoleName || (await userManager.GetUsersInRoleAsync(role)).Count > 1)
-                    await userManager.RemoveFromRoleAsync(userDb, role);
-                } else 
+                        await userManager.RemoveFromRoleAsync(userDb, role);
+                }
+                else
                     await userManager.AddToRoleAsync(userDb, role);
             }
             await LoadUsers();
@@ -66,7 +67,7 @@ namespace BlogovaciWeb.Areas.Admin.Pages
             return Page();
         }
 
-        private async Task LoadUsers()
+        async Task LoadUsers()
         {
             var roles = roleManager.Roles.Select(x => x.Name);
             var usersInRole = new Dictionary<string, string[]>();
@@ -74,11 +75,11 @@ namespace BlogovaciWeb.Areas.Admin.Pages
                 usersInRole.Add(role, (await userManager.GetUsersInRoleAsync(role))
                     .Select(x => x.UserName).ToArray());
 
-            UsersList = await userManager.Users.Select(x => new UserDataForAdmin()
+            UsersList = await userManager.Users.Select(x => new UsersDataForAdmin()
             {
                 UserName = x.UserName,
                 Email = x.Email,
-                BanEnds = x.LockoutEnd
+                BanEnds = x.LockoutEnd,                
             }).ToListAsync();
 
             foreach (var user in UsersList)
@@ -86,12 +87,12 @@ namespace BlogovaciWeb.Areas.Admin.Pages
                     .Select(x => x.Key).ToArray();
         }
 
-        public class UserDataForAdmin
+        public class UsersDataForAdmin
         {
             public string UserName { get; set; }
             public string Email { get; set; }
-            public DateTimeOffset? BanEnds { get; set; }
             public string[] Roles { get; set; }
+            public DateTimeOffset? BanEnds { get; set; }
         }
     }
 }

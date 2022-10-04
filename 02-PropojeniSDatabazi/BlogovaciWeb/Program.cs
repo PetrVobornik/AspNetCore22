@@ -30,11 +30,10 @@ builder.Services.Configure<SecurityStampValidatorOptions>(options => {
 
 builder.Services.ConfigureApplicationCookie(options => {
     options.SlidingExpiration = true;
-    options.ExpireTimeSpan = TimeSpan.FromMinutes(20);
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
 });
 
-builder.Services.AddAuthorization(options =>
-{
+builder.Services.AddAuthorization(options => {
     options.AddPolicy("EditorPolicy", p => p.RequireRole(Seed.EditorRoleName));
     options.AddPolicy("AdminPolicy", p => p.RequireRole(Seed.AdminRoleName));
 });

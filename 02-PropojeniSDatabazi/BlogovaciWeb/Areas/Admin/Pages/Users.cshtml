@@ -1,4 +1,5 @@
 ﻿@page
+@using BlogovaciWeb.Code
 @model BlogovaciWeb.Areas.Admin.Pages.UsersModel
 @{
 }
@@ -16,12 +17,8 @@
         @foreach (var user in Model.UsersList)
         {
             <tr>
-                <th scope="row">
-                    @user.UserName
-                </th>
-                <td>
-                    @user.Email
-                </td>
+                <th scope="row">@user.UserName</th>
+                <td>@user.Email</td>
                 <td>
                     <form method="post" asp-page-handler="role">
                         <input type="hidden" name="user" value="@user.UserName" />
@@ -36,7 +33,8 @@
                     <form method="post" asp-page-handler="ban">
                         <input type="hidden" name="user" value="@user.UserName" />
                         <input type="hidden" name="ban" value="" />
-                        @if ((user.BanEnds ?? DateTimeOffset.MinValue) < DateTimeOffset.MaxValue)
+                        @if ((user.BanEnds ?? DateTimeOffset.MinValue) < DateTimeOffset.MaxValue &&
+                             !user.Roles.Contains(Seed.AdminRoleName))
                         {
                             <button type="submit" onclick="$(this).parent('form').find('input[name=\'ban\']').val('kick')"
                                 class="btn btn-warning">Kick</button>
@@ -47,8 +45,8 @@
                         {
                             <button type="submit" onclick="$(this).parent('form').find('input[name=\'ban\']').val('cancel')"
                                 class="btn btn-success">Pustit</button>
+                            <p>Ban končí: @user.BanEnds?.DateTime.ToString("d.M.yyyy HH:mm")</p>
                         }
-                        <p>@user.BanEnds</p>
                     </form>
                 </td>
             </tr>
