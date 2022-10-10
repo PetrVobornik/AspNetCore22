@@ -11,5 +11,6 @@ namespace BlogovaciWeb.Data
         }
 
         public DbSet<BlogItem> Blog => Set<BlogItem>();
+        public DbSet<Komentar> Komentare => Set<Komentar>();
     }
 }

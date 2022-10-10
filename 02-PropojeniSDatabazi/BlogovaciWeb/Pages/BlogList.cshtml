@@ -1,4 +1,5 @@
 ﻿@page "/blog"
+@using BlogovaciWeb.Code
 @model BlogovaciWeb.Pages.BlogListModel
 @{
     ViewData["Title"] = "Blog";
@@ -20,5 +21,7 @@
     
 </div>
 
-
-<a href="/editor/blog/0" class="btn btn-outline-primary">Přidat</a>
+@if (Model.User.Identity.IsAuthenticated && Model.User.IsInRole(Seed.EditorRoleName))
+{
+    <a href="/editor/blog/0" class="btn btn-outline-primary mt-5">Přidat</a>
+}

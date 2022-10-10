@@ -1,7 +1,9 @@
+using BlogovaciWeb.Code;
 using BlogovaciWeb.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace BlogovaciWeb.Areas.Editor.Pages
 {
@@ -40,12 +42,26 @@ namespace BlogovaciWeb.Areas.Editor.Pages
 
         public async Task OnPostAsync()
         {
+            var currentUser = await DB.Users.AsNoTracking().FirstOrDefaultAsync(
+                    x => x.UserName == User.Identity.Name);
             if (ItemId == 0)
             {
-                Input.Autor = await DB.Users.FirstOrDefaultAsync(
-                    x => x.UserName == User.Identity.Name);
-                ModelState.Clear();
+                Input.AutorId = currentUser.Id;
+            } else
+            {
+                var item = await DB.Blog
+                    .AsNoTracking()
+                    .Include(nameof(BlogItem.Autor))
+                    .FirstOrDefaultAsync(x => x.Id == ItemId);
+                Input.Autor = item.Autor ?? currentUser;
+                if (Input.Autor.UserName != currentUser.UserName &&
+                    !User.IsInRole(Seed.AdminRoleName))
+                {
+                    ModelState.AddModelError("Autor", "Autora nelze mìnit");
+                    return;
+                }
             }
+            ModelState.Clear();
             if (Input == null || !TryValidateModel(Input))
                 return;
 

@@ -1,5 +1,46 @@
 ﻿@page "/blog/{ItemId:int}"
+@using BlogovaciWeb.Code
 @model BlogovaciWeb.Pages.BlogItemModel
+
+@functions 
+{
+    async Task PridejKomentar(Komentar komentar)
+    {
+        <li class="list-group-item pe-1">
+            <div class="hstack md-3 mx-auto me-3">
+                <p class="fw-bold">@komentar.Vlozil.UserName</p>
+                <p class="text-muted ms-auto">@komentar.Datum.ToString("d.M.yyyy HH:mm")</p>
+            </div>
+            <p>@Html.Raw(komentar.Text)</p>
+            @if (Model.User.Identity.IsAuthenticated)
+            {
+                <div class="hstack mx-auto gap-3 me-3">
+                    <button onclick="ShowComment('@komentar.Id', '@(komentar.Vlozil.UserName.Replace("'", @"\'"))', '@komentar.Datum.ToString("d.M.yyyy HH:mm")')"
+                        class="btn btn-outline-primary ms-auto">Reagovat</button>
+                    @if (Model.User.IsInRole(Seed.AdminRoleName))
+                    {
+                        <form method="post" asp-page-handler="delete">
+                            <input type="hidden" name="id" value="@komentar.Id" />
+                            <button type="submit" class="btn btn-outline-danger" title="Vymazat příspěvek">X</button>
+                        </form>
+                    }
+                </div>
+            }
+            @if (Model.Blog.Komentare.Any(x => x.ReakceNaId == komentar.Id))
+            {
+                 <ul class="list-group ms-3 mt-3">
+                    @foreach (var reakce in Model.Blog.Komentare
+                       .Where(x => x.ReakceNaId == komentar.Id)
+                       .OrderBy(x => x.Datum))
+                    {
+                        await PridejKomentar(reakce);
+                    }
+                </ul>
+            }
+        </li>
+    }
+}
+
 @{
     ViewData["Title"] = Model.Blog.Nadpis;
 }
@@ -14,8 +55,69 @@
 
 <p>@Model.Blog.Prispevek</p>
 
-<p>
-    <a href="/blog" class="btn btn-outline-primary mt-5 float-start">Zpět</a>
-    <a href="/editor/blog/@Model.Blog.Id" class="btn btn-outline-primary mt-5 float-end">Upravit</a>
-
+<p class="hstack md-5 mx-auto mt-5">
+    <a href="/blog" class="btn btn-outline-primary">Zpět</a>
+    @if (Model.User.Identity.IsAuthenticated && 
+         (Model.User.IsInRole(Seed.AdminRoleName) ||
+          Model.Blog.Autor?.UserName == Model.User?.Identity?.Name))
+    {
+        <a href="/editor/blog/@Model.Blog.Id" class="btn btn-outline-primary mt-5 ms-auto">Upravit</a>
+    }
 </p>
+
+@if ((Model.Blog.Komentare?.Count??0) > 0)
+{
+    <h2>Komentáře</h2>
+    <ul class="list-group">
+        @foreach (var komentar in Model.Blog.Komentare
+            .Where(x => x.ReakceNaId is null)
+            .OrderByDescending(x => x.Datum))
+        {
+            await PridejKomentar(komentar);
+        }
+    </ul>
+}
+
+@if (Model.User.Identity.IsAuthenticated)
+{
+    <button type="button" class="btn btn-primary mt-5" id="komentovat" onclick="ShowComment('', '', '')">Komentovat</button>
+
+    <div class="mt-5" style="display: none" id="komentar">
+        <form method="post" asp-page-handler="comment" id="komentar_form">
+            <input type="hidden" name="reakce" id="reakce" />
+            <label class="form-label" for="text">Váš komentář</label>
+            <textarea name="text" id="text" class="form-control mx-auto" rows="3"></textarea>
+            <div id="reaguje">Reagujete na příspěvek od <span id="reakce_koho"></span> z <span id="reakce_kdy"></span>.</div>
+            <div class="mt-3 gap-3 d-grid d-flex justify-content-end">
+                <button type="submit" class="btn btn-primary me-2">Odelsat</button>
+                <button type="button" class="btn btn-outline-danger" onclick="HideComment()">Zrušit</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function ShowComment(id, koho, kdy) {
+            $("#komentar_form").trigger("reset");
+            $("#reakce").val(id);
+            $("#komentar").show();
+            $("#komentovat").hide();
+            if (!id)
+            {
+                $("#reaguje").hide();
+
+            } else {
+                $("#reakce_koho").text(koho);
+                $("#reakce_kdy").text(kdy);
+                $("#reaguje").show();
+            }
+            $('body').scrollTo("#komentar");
+        }
+        function HideComment() {
+            $("#komentar").hide();
+            $("#komentar_form").trigger("reset");
+            $("#reakce").val("");
+            $("#reaguje").hide();
+            $("#komentovat").show();
+        }
+    </script>
+}

@@ -27,6 +27,8 @@ public record BlogItem
 
     public IdentityUser Autor { get; set; }
     
-    public string? AutorId { get; set; }
+    public string AutorId { get; set; }
+
+    public ICollection<Komentar> Komentare { get; set; }
 
 }

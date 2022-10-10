@@ -34,7 +34,7 @@ builder.Services.ConfigureApplicationCookie(options => {
 });
 
 builder.Services.AddAuthorization(options => {
-    options.AddPolicy("EditorPolicy", p => p.RequireRole(Seed.EditorRoleName));
+    options.AddPolicy("EditorPolicy", p => p.RequireRole(Seed.EditorRoleName, Seed.AdminRoleName));
     options.AddPolicy("AdminPolicy", p => p.RequireRole(Seed.AdminRoleName));
 });
 
