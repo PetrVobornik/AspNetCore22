@@ -10,12 +10,12 @@ namespace BlogovaciWeb.Code
         public const string AdminRoleName = "admin";
 
         readonly ApplicationDbContext DB;
-        readonly UserManager<IdentityUser> userManager;
-        readonly RoleManager<IdentityRole> roleManager;
+        readonly UserManager<BlogUser> userManager;
+        readonly RoleManager<BlogRole> roleManager;
 
         public Seed(ApplicationDbContext db,
-                    UserManager<IdentityUser> userManager,
-                    RoleManager<IdentityRole> roleManager)
+                    UserManager<BlogUser> userManager,
+                    RoleManager<BlogRole> roleManager)
         {
             DB = db;
             this.userManager = userManager;
@@ -38,8 +38,9 @@ namespace BlogovaciWeb.Code
             var adminUser = await userManager.FindByNameAsync("admin@neco.cz");
             if (adminUser == null)
             {
-                adminUser = new IdentityUser()
+                adminUser = new BlogUser()
                 {
+                    NickName = "Admin",
                     UserName = "admin@neco.cz",
                     Email = "admin@neco.cz",
                     EmailConfirmed = true
@@ -53,12 +54,12 @@ namespace BlogovaciWeb.Code
                 await userManager.AddToRoleAsync(adminUser, AdminRoleName);
         }
 
-        async Task<IdentityRole> FindOrAddRole(string roleName)
+        async Task<BlogRole> FindOrAddRole(string roleName)
         {
             var role = await roleManager.FindByNameAsync(roleName);
             if (role == null)
             {
-                role = new IdentityRole(roleName);
+                role = new BlogRole(roleName);
                 await roleManager.CreateAsync(role);
             }
             return role;

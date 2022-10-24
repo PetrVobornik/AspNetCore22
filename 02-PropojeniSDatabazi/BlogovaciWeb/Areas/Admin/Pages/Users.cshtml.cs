@@ -10,14 +10,14 @@ namespace BlogovaciWeb.Areas.Admin.Pages
     public class UsersModel : PageModel
     {
         readonly ApplicationDbContext DB;
-        readonly UserManager<IdentityUser> userManager;
-        readonly RoleManager<IdentityRole> roleManager;
+        readonly UserManager<BlogUser> userManager;
+        readonly RoleManager<BlogRole> roleManager;
 
         public List<UsersDataForAdmin> UsersList { get; set; }
 
         public UsersModel(ApplicationDbContext db,
-                    UserManager<IdentityUser> userManager,
-                    RoleManager<IdentityRole> roleManager)
+                    UserManager<BlogUser> userManager,
+                    RoleManager<BlogRole> roleManager)
         {
             DB = db;
             this.userManager = userManager;
@@ -78,6 +78,7 @@ namespace BlogovaciWeb.Areas.Admin.Pages
             UsersList = await userManager.Users.Select(x => new UsersDataForAdmin()
             {
                 UserName = x.UserName,
+                NickName = x.NickName,
                 Email = x.Email,
                 BanEnds = x.LockoutEnd,                
             }).ToListAsync();
@@ -90,6 +91,7 @@ namespace BlogovaciWeb.Areas.Admin.Pages
         public class UsersDataForAdmin
         {
             public string UserName { get; set; }
+            public string NickName { get; set; }
             public string Email { get; set; }
             public string[] Roles { get; set; }
             public DateTimeOffset? BanEnds { get; set; }

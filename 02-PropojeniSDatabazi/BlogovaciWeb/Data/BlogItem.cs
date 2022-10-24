@@ -25,9 +25,9 @@ public record BlogItem
     public bool Pripnuto { get; set; }
 
 
-    public IdentityUser Autor { get; set; }
+    public BlogUser Autor { get; set; }
     
-    public string AutorId { get; set; }
+    public int AutorId { get; set; }
 
     public ICollection<Komentar> Komentare { get; set; }
 

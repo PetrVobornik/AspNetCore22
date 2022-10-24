@@ -30,13 +30,15 @@ namespace BlogovaciWeb.Areas.Editor.Pages
             if (ItemId == 0)
             {
                 Input = new BlogItem();
-                Autor = User.Identity.Name;
+                Autor = (await DB.Users
+                    .FirstOrDefaultAsync(x => x.UserName == User.Identity.Name))
+                    ?.NickName;
             }
             else
             {
                 Input = await DB.Blog.Include(nameof(BlogItem.Autor))
                     .FirstOrDefaultAsync(x => x.Id == ItemId);
-                Autor = Input.Autor?.UserName ?? "?";
+                Autor = Input.Autor?.NickName ?? "?";
             }
         }
 
@@ -73,6 +75,7 @@ namespace BlogovaciWeb.Areas.Editor.Pages
             else if (Input.Id < 0)
             {
                 Input.Id = ItemId;
+                DB.Komentare.RemoveRange(DB.Komentare.Where(x => x.BlogId == ItemId));
                 DB.Remove(Input);
                 smazat = true;
             }

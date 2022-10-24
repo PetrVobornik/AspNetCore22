@@ -10,7 +10,7 @@
     {
         <a href="/blog/@item.Id" class="list-group-item list-group-item-action position-relative">
             <h2>@item.Nadpis</h2>
-            <p>Napsal: @(item.Autor?.UserName ?? "?") (@item.Datum.ToString("dd.MM.yyyy"))</p>
+            <p>Napsal: @(item.Autor?.NickName ?? "?") (@item.Datum.ToString("dd.MM.yyyy"))</p>
             <p>@item.Perex</p>
             @if (item.Pripnuto)
             {

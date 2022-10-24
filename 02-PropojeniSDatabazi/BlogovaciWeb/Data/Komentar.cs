@@ -19,8 +19,8 @@ public record Komentar
     public int BlogId { get; set; }
 
 
-    public IdentityUser Vlozil { get; set; }
-    public string VlozilId { get; set; }
+    public BlogUser Vlozil { get; set; }
+    public int VlozilId { get; set; }
 
     public Komentar ReakceNa { get; set; }
     public int? ReakceNaId { get; set; }

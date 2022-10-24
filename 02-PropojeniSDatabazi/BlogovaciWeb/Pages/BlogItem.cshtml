@@ -8,7 +8,7 @@
     {
         <li class="list-group-item pe-1">
             <div class="hstack md-3 mx-auto me-3">
-                <p class="fw-bold">@komentar.Vlozil.UserName</p>
+                <p class="fw-bold">@komentar.Vlozil.NickName</p>
                 <p class="text-muted ms-auto">@komentar.Datum.ToString("d.M.yyyy HH:mm")</p>
             </div>
             <p>@Html.Raw(komentar.Text)</p>
@@ -51,7 +51,7 @@
 }
 
 <h1>@Model.Blog.Nadpis</h1>
-<p class="mb-5">Napsal: @(Model.Blog.Autor?.UserName ?? "?") (@Model.Blog.Datum.ToString("dd.MM.yyyy"))@(Model.Blog.Pripnuto ? " *" : "")</p>
+<p class="mb-5">Napsal: @(Model.Blog.Autor?.NickName ?? "?") (@Model.Blog.Datum.ToString("dd.MM.yyyy"))@(Model.Blog.Pripnuto ? " *" : "")</p>
 
 <p>@Model.Blog.Prispevek</p>
 
