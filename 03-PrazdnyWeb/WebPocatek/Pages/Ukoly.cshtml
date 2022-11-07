@@ -1,0 +1,25 @@
+﻿@page
+@model WebPocatek.Pages.UkolyModel
+@{
+}
+<table class="table">
+    <thead>
+        <tr>
+            <th>Hotovo</th>
+            <th>Úkol</th>
+            <th>Popis</th>
+            <th>Termín</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var ukol in Model.Ukoly)
+        {
+            <tr>
+                <td><input type="checkbox" class="form-check-input" @(ukol.Hotovo ? "checked" : "") disabled /></td>
+                <td>@ukol.Nazev</td>
+                <td>@ukol.Popis</td>
+                <td>@ukol.Termin.Remains()</td>
+            </tr>
+        }
+    </tbody>
+</table>

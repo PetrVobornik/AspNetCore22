@@ -12,10 +12,11 @@
 <body>
     <div class="m-3">
         <h1>Web</h1>
-        <ul class="list-group list-group-horizontal list-group-item-action">
-            <li class="list-group-item"><a href="/">Úvod</a></li>
-            <li class="list-group-item"><a asp-page="/Seznam">Seznam</a></li>
-        </ul>
+        <div class="list-group list-group-horizontal">
+            <a class="list-group-item @(ViewContext?.RouteData?.Values["page"]?.ToString() == "/Index" ? "active" : "")" asp-page="/Index">Úvod</a>
+            <a class="list-group-item @(ViewContext?.RouteData?.Values["page"]?.ToString() == "/Seznam" ? "active" : "")" asp-page="/Seznam">Seznam</a>
+            <a class="list-group-item @(ViewContext?.RouteData?.Values["page"]?.ToString() == "/Ukoly" ? "active" : "")" asp-page="/Ukoly">Úkoly</a>
+        </div>
         @RenderBody()
     </div>
 </body>
