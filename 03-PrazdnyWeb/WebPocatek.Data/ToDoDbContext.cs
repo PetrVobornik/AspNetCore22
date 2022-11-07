@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace WebPocatek.Data;
 
-public class ToDoDbContext : DbContext
+public class ToDoDbContext : IdentityDbContext
 {
     public ToDoDbContext(DbContextOptions options) : base(options) { }
 

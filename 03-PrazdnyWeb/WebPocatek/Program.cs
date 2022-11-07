@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using WebPocatek.Data;
 
@@ -11,6 +12,11 @@ builder.Services.AddRazorPages();
 builder.Services.AddDbContext<ToDoDbContext>(options => 
     options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer"))
 );
+
+// Servis pro Identity
+builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+    .AddEntityFrameworkStores<ToDoDbContext>()
+    .AddDefaultTokenProviders();
 
 // Vytvoøení aplikace
 var app = builder.Build();
