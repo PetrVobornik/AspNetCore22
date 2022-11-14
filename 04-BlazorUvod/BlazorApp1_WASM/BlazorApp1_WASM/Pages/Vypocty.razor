@@ -1,0 +1,11 @@
+﻿@page "/vypocty"
+
+<h3>Výpočty</h3>
+
+<p>
+    <input @bind-value="A" /> + <input @bind-value="B" /> = <span>@(A+B)</span>
+</p>
+
+@code {
+    int A, B;
+}
