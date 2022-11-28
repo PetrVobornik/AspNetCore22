@@ -1,0 +1,154 @@
+﻿@page "/"
+@using BlazorAPI.Client.Code;
+@using BlazorAPI.Shared;
+
+
+<div class="container">
+    <h1>Úkoly</h1>
+    @if ((ukoly?.Count ?? 0) > 0)
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Hotovo</th>
+                    <th>Úkol</th>
+                    <th>Popis</th>
+                    <th>Termín</th>
+                    <th>Ovládání</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var ukol in ukoly)
+                {
+                    <tr>
+                        @if (ukol.Id != upravovanyUkol?.Id)
+                        {
+                            <td>
+                                @if (ukol.Hotovo)
+                                {
+                                    <button class="btn btn-primary oi oi-check"
+                                        @onclick="() => HotovoZmeneno(ukol)"></button>
+                                } else
+                                {
+                                    <button class="btn btn-outline-primary oi" style="width: 42px;"
+                                        @onclick="() => HotovoZmeneno(ukol)">&nbsp;</button>
+                                }
+                            </td>
+                            <td>@ukol.Nazev</td>
+                            <td>@ukol.Popis</td>
+                            <td>@ukol.Termin.Remains()</td>
+                            <td>
+                                <button class="btn btn-secondary me-2" @onclick="() => Upravit(ukol)">Upravit</button>
+                                <button class="btn btn-danger" @onclick="() => Vymazat(ukol)">Vymazat</button>
+                            </td>
+                        } else
+                        {
+                            <td>
+                                <input type="checkbox" class="form-check-input" @bind="upravovanyUkol.Hotovo" />
+                            </td>
+                            <td>
+                                <input type="text" class="form-control" @bind="upravovanyUkol.Nazev" />
+                            </td>
+                            <td>
+                                <textarea class="form-control" rows="3" @bind="upravovanyUkol.Popis"></textarea>
+                            </td>
+                            <td>
+                                <input type="date" class="form-control" @bind="upravovanyUkol.Termin" />
+                            </td>
+                            <td>
+                                <button class="btn btn-success oi oi-check me-2" @onclick="Ulozit" title="Uložit"></button>
+                                <button class="btn btn-warning oi oi-x" @onclick="Zrusit" title="Zrušit"></button>
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    } else
+    {
+        <p>Nejsou žádné úkoly</p>
+    }
+    <div class="d-flex justify-content-end">
+        <button class="btn btn-primary oi oi-plus me-2" title="Přidat nový úkol" @onclick="Novy"></button>
+        <button class="btn btn-primary oi oi-reload" title="Přenačíst data" @onclick="Nacist"></button>
+    </div>
+</div>
+
+@code {
+    [Inject]
+    HttpClient client { get; set; }
+
+    List<Ukol> ukoly;
+    Ukol upravovanyUkol;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Nacist();
+        await base.OnInitializedAsync();
+    }
+
+    async Task Nacist()
+    {
+        var result = await client.GetAsync("api/Ukol");
+        if (result.IsSuccessStatusCode)
+            ukoly = (await result.Content.ReadFromJsonAsync<List<Ukol>>())?
+                .OrderBy(x => x.Hotovo)
+                .ThenBy(x => x.Termin ?? DateTime.MaxValue)
+                .ThenBy(x => x.Nazev)
+                .ToList();
+    }
+
+    async Task HotovoZmeneno(Ukol ukol)
+    {
+        ukol.Hotovo = !ukol.Hotovo;
+        await client.PutAsJsonAsync<Ukol>($"api/Ukol/{ukol.Id}", ukol);
+    }
+
+    async Task Vymazat(Ukol ukol)
+    {
+        await client.DeleteFromJsonAsync<Ukol>($"api/Ukol/{ukol.Id}");
+        ukoly.Remove(ukol);
+    }
+
+    void Upravit(Ukol ukol)
+    {
+        upravovanyUkol = ukol with { };
+    }
+
+    async Task Ulozit()
+    {
+        if (upravovanyUkol == null) return;
+        if (upravovanyUkol.Id == 0)
+        {
+            var result = await client.PostAsJsonAsync<Ukol>($"api/Ukol", upravovanyUkol);
+            if (result.IsSuccessStatusCode)
+            {
+                var novyUkol = await result.Content.ReadFromJsonAsync<Ukol>();
+                ukoly.Remove(upravovanyUkol);
+                ukoly.Insert(0, novyUkol);
+            }
+        }
+        else
+        {
+            await client.PutAsJsonAsync<Ukol>($"api/Ukol/{upravovanyUkol.Id}", upravovanyUkol);
+            var oldUkol = ukoly.FirstOrDefault(x => x.Id == upravovanyUkol.Id);
+            var index = ukoly.IndexOf(oldUkol);
+            ukoly.Remove(oldUkol);
+            ukoly.Insert(index, upravovanyUkol);
+        }
+        upravovanyUkol = null;
+    }
+
+    void Zrusit()
+    {
+        if (upravovanyUkol?.Id == 0)
+            ukoly.Remove(upravovanyUkol);
+        upravovanyUkol = null;
+    }
+
+    void Novy()
+    {
+        upravovanyUkol = new Ukol() { Id = 0, Termin = DateTime.Today.AddDays(1) };
+        ukoly.Insert(0, upravovanyUkol);
+    }
+}
