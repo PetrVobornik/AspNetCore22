@@ -1,0 +1,105 @@
+﻿@page "/miny/{Rozmery?}"
+
+<h2>Najdi všechny miny!</h2>
+
+@if (HP == null)
+{
+    <p>Načítám...</p>
+}
+else
+{
+    <div>
+        <table class="tabulka" cellpadding="0" cellspacing="0">
+            @for (int i = 0; i < HP.Vyska; i++)
+            {
+                <tr>
+                    @for (int j = 0; j < HP.Sirka; j++)
+                    {
+                        var bunka = HP.MinovePole[i, j];
+                        <td>
+                            @if (bunka.Odkryto)
+                            {
+                                <div class="bunka bunkaOdkryta@(bunka.CssClass)">
+                                    @switch (bunka.Typ)
+                                    {
+                                        case 9:
+                                            <span>X</span>
+                                            break;
+                                        case 0:
+                                            <span>&nbsp;</span>
+                                            break;
+                                        default:
+                                            <span>@bunka.Typ</span>
+                                            break;
+                                    }
+                                </div>
+                            }
+                            else if (HP.Stav == StavHry.Probiha)
+                            {
+                                <div class="bunka bunkaNeodkryta"
+                     @onclick="() => bunka.Odkryj(true)"
+                     @oncontextmenu="() => bunka.Oznac()"
+                     @oncontextmenu:preventDefault>
+                                    @(bunka.Oznaceno ? "!" : "")
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="bunka bunkaNeodkryta">
+                                    @(bunka.Oznaceno ? "!" : "")
+                                </div>
+                            }
+                        </td>
+                    }
+                </tr>
+            }
+        </table>
+    </div>
+
+    @if (HP.Stav == StavHry.Vyhra)
+    {
+        <h3 class="vyhra">Vítězství!!!</h3>
+    }
+    else @if (HP.Stav == StavHry.Prohra)
+    {
+        <h3 class="prohra">Prohra...</h3>
+    }
+
+    <button type="button" @onclick="() => HP.VytvorPole()">Restart</button>
+}
+
+@code {
+    [Parameter]
+    public string Rozmery { get; set; }
+
+    HraciPole HP;
+
+    protected override void OnInitialized()
+    {
+        int defRozmer = (DeviceInfo.Current.Idiom == 
+                         DeviceIdiom.Phone ? 10 : 15);
+        HP = new HraciPole()
+            {
+                Vyska = defRozmer,
+                Sirka = defRozmer,
+                PocetMin = (int)(defRozmer * defRozmer * 0.1),
+            };
+
+        if (!String.IsNullOrWhiteSpace(Rozmery))
+        {
+            var prms = Rozmery.Split('x')
+                .Select(x => (int.TryParse(x, out int i) ? i : 0))
+                .Where(x => x > 0)
+                .ToArray();
+            if (prms.Length == 1)
+                HP.PocetMin = prms[0];
+            else if (prms.Length == 2)
+                (HP.Vyska, HP.Sirka, HP.PocetMin) = (prms[0], prms[0], prms[1]);
+            else if (prms.Length == 3)
+                (HP.Vyska, HP.Sirka, HP.PocetMin) = (prms[0], prms[1], prms[2]);
+        }
+
+        HP.VytvorPole();
+        base.OnInitialized();
+    }
+}
