@@ -7,7 +7,7 @@
     async Task PridejKomentar(Komentar komentar)
     {
         <li class="list-group-item pe-1">
-            <div class="hstack md-3 mx-auto me-3">
+            <div class="hstack mx-auto me-3">
                 <p class="fw-bold">@komentar.Vlozil.NickName</p>
                 <p class="text-muted ms-auto">@komentar.Datum.ToString("d.M.yyyy HH:mm")</p>
             </div>
@@ -55,7 +55,7 @@
 
 <p>@Model.Blog.Prispevek</p>
 
-<p class="hstack md-5 mx-auto mt-5">
+<p class="hstack my-5 mx-auto">
     <a href="/blog" class="btn btn-outline-primary">Zpět</a>
     @if (Model.User.Identity.IsAuthenticated && 
          (Model.User.IsInRole(Seed.AdminRoleName) ||
