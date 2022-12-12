@@ -1,0 +1,110 @@
+﻿@page "/"
+@using Blazor.Extensions.Canvas
+@using Blazor.Extensions;
+@using Blazor.Extensions.Canvas.Canvas2D;
+@using BlazorCanvas.Code;
+@using System.Drawing;
+
+@inject IJSRuntime JSRuntime;
+
+<div style="position: fixed; width: 100%; height: 100%;"
+    tabindex="0" @onkeydown="StiskKlavesy" @onkeydown:preventDefault>
+    <BECanvas Width="600" Height="400" @ref="canvas"></BECanvas>
+</div>
+
+@code {
+    BECanvasComponent canvas;
+    Canvas2DContext ctx;
+    DateTime casPosledniObnovy;
+    Had had;
+    Jidlo jidlo;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        ctx = await canvas.CreateCanvas2DAsync();
+        await JSRuntime.InvokeAsync<object>("pripravHruJS", DotNetObjectReference.Create(this));
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    protected override bool ShouldRender() => false;
+
+    void StiskKlavesy(KeyboardEventArgs e)
+    {
+        if (e.Code == "ArrowUp" || e.Code == "KeyW") had.Smer = new Point(0, -1);
+        else if (e.Code == "ArrowDown" || e.Code == "KeyS") had.Smer = new Point(0, 1);
+        else if (e.Code == "ArrowLeft" || e.Code == "KeyA") had.Smer = new Point(-1, 0);
+        else if (e.Code == "ArrowRight" || e.Code == "KeyD") had.Smer = new Point(1, 0);
+        else if (e.Code == "Space" || e.Key == "Enter")
+        {
+            if (had.Skoncil)
+                had = new Had(had.Plocha, had.Velikost);
+            else
+                had.Smer = new Point(0, 0);
+        }
+    }
+
+    [JSInvokable]
+    public void ZmenaVelikosti(double width, double height)
+    {
+        var plocha = new Size((int)width, (int)height);
+        if (had == null)
+            had = new Had(plocha);
+        else
+            had.ZmenaPlochy(plocha);
+        jidlo?.ZmenaPlochy(had);
+    }
+
+    [JSInvokable]
+    public async ValueTask ObnovaHry(float timeStamp)
+    {
+        if ((DateTime.Now - casPosledniObnovy).TotalMilliseconds < 150) return;
+        casPosledniObnovy = DateTime.Now;
+
+        // Poprvé
+        if (had == null)
+            had = new Had(new Size((int)canvas.Width, (int)canvas.Height));
+        if (jidlo == null)
+            jidlo = new Jidlo(had);
+
+        // Posun hada
+        had.Posun();
+        // Snězení jídla
+        if (jidlo.Kolize(had))
+        {
+            had.Ocas.Add(jidlo.Pozice);
+            jidlo.Umisti(had);
+        }
+
+        // Vykreslení
+        await ctx.BeginBatchAsync();
+
+        // Vyčistit plochu
+        await ctx.ClearRectAsync(0, 0, had.Plocha.Width, had.Plocha.Height);
+        await ctx.SetFillStyleAsync("#000000");
+        await ctx.FillRectAsync(0, 0, had.Plocha.Width, had.Plocha.Height);
+
+        // Jídlo
+        await ctx.BeginPathAsync();
+        await ctx.SetFillStyleAsync("#FF0000");
+        await ctx.ArcAsync(jidlo.Pozice.X + had.Velikost / 2,
+                           jidlo.Pozice.Y + had.Velikost / 2,
+                           had.Velikost / 2, 0, 2 * Math.PI);
+        await ctx.FillAsync();
+        await ctx.ClosePathAsync();
+        // Had
+        await ctx.SetFillStyleAsync("#00FF00");
+        for (int i = 1; i < had.Ocas.Count; i++)
+            await ctx.FillRectAsync(had.Ocas[i].X+1, had.Ocas[i].Y+1, 
+                                    had.Velikost-1, had.Velikost-1);
+        // Hlava hada
+        await ctx.SetFillStyleAsync(had.Skoncil ? "#FFAAAA" : "#00FFFF");
+        await ctx.FillRectAsync(had.Ocas[0].X+1, had.Ocas[0].Y+1, 
+                                    had.Velikost-1, had.Velikost-1);
+        // Score
+        await ctx.SetFontAsync("26px Segoe UI");
+        await ctx.SetFillStyleAsync("#FFFFFF");
+        await ctx.FillTextAsync($"{had.Ocas.Count - 1}", 10, 30);
+
+        await ctx.EndBatchAsync();
+    }
+}
