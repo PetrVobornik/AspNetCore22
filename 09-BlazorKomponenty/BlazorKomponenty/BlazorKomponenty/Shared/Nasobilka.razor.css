@@ -1,0 +1,15 @@
+﻿table {
+    margin: 1rem auto;
+    border: 1px solid black;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+table th, table td {
+    text-align: right;
+    padding: 0.1rem 0.4rem;
+    border: 1px solid black;
+}
+
+table th {
+    background-color: #EEEEEE;
+}

@@ -1,0 +1,81 @@
+﻿@page "/"
+
+<h1>Komponenty</h1>
+
+<Button Color="ButtonColor.Danger" @onclick="ShowConfirmationAsync">Smazat</Button>
+
+
+<Button Color="ButtonColor.Primary">Odeslat</Button>
+<Button Color="ButtonColor.Primary" Type="ButtonType.Link" To="#">Odejít</Button>
+<Button Color="ButtonColor.Primary" Size="Size.Large">Velké</Button>
+<Button Color="ButtonColor.Primary" Size="Size.Small">Malé</Button>
+<Button Color="ButtonColor.Primary" TooltipPlacement="TooltipPlacement.Top"
+        TooltipTitle="Nápověda">Nápověda</Button>
+<Button Color="ButtonColor.Primary" Loading="true" LoadingText="Načítám..." />
+
+<br />
+<br />
+
+
+<Alert Color="AlertColor.Success" Dismissable="true">
+    <Icon Name="IconName.CheckCircleFill" class="me-2" />
+    Vítejte na stránce
+</Alert>
+
+<Callout Type="CalloutType.Warning">
+    <strong>Varování!</strong> Tento web brzy skončí.
+</Callout>
+
+
+<Nasobilka />
+
+<Nasobilka Od="10" Do="100" Krok="10" />
+
+
+<ConfirmDialog @ref="dialog" />
+
+<Toasts class="p-3" Messages="messages" AutoHide="true" StackLength="3" 
+        Placement="ToastsPlacement.TopRight" />
+
+
+@code {
+    private ConfirmDialog dialog;
+    List<ToastMessage> messages = new();
+    
+    [Inject]
+    ToastService ToastService { get; set; }
+
+
+    private async Task ShowConfirmationAsync()
+    {
+        var confirmation = await dialog.ShowAsync(
+            title: "Mazání",
+            message1: "Smažeme záznam X ze seznamu Y.",
+            message2: "Opravdu si to přejete vymazat?",
+            new ConfirmDialogOptions()
+            {
+                YesButtonText = "Ano",
+                NoButtonText = "Ne",
+                YesButtonColor = ButtonColor.Danger,
+                NoButtonColor = ButtonColor.Primary
+            }
+        );
+
+        if (confirmation)
+        {
+            messages.Add(
+                new ToastMessage
+                {
+                    Type = ToastType.Success,
+                    Title = "Výmaz",
+                    HelpText = $"{DateTime.Now}",
+                    Message = $"Záznam X byl vymazán"
+                }
+            );
+        }
+        else
+        {
+            ToastService.Notify(new ToastMessage(ToastType.Secondary, $"Mazání zrušeno."));
+        }
+    }
+}

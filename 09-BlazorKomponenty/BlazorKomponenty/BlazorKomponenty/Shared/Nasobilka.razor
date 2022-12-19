@@ -1,0 +1,30 @@
+﻿<table cellpadding="0" cellspacing="0">
+    <tr>
+        <th>&nbsp;</th>
+        @for (int j = Od; j <= Do; j += Krok)
+        {
+            <th>@j</th>
+        }
+    </tr>
+    @for (int i = Od; i <= Do; i += Krok)
+    {
+        <tr>
+            <th>@i</th>
+            @for (int j = Od; j <= Do; j += Krok)
+            {
+                <td>@((i*j).ToString("N0"))</td>
+            }
+        </tr>
+    }
+</table>
+
+@code {
+    [Parameter]
+    public int Od { get; set; } = 1;
+
+    [Parameter]
+    public int Do { get; set; } = 10;
+
+    [Parameter]
+    public int Krok { get; set; } = 1;
+}
