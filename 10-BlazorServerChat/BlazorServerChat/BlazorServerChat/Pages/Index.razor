@@ -1,0 +1,87 @@
+﻿@page "/"
+
+<PageTitle>Chatovací místnosti</PageTitle>
+
+@inject ProtectedLocalStorage Storage
+@inject NavigationManager NavigationManger
+
+<div class="w-50 mx-auto">
+    <h1>Chatovací místnosti</h1>
+    <p>
+        <label>Vaše přezdívka: <input type="text" @bind-value="Prezdivka"
+            @onfocusout="UlozitPrezdivku" @ref="PrezdivkaInput" />
+        </label>
+    </p>
+    @if (mistnosti == null)
+    {
+        <p>Načítám...</p>
+    } 
+    else 
+    {
+        <h2 class="mt-5">Chatovací místnosti</h2>
+        <div class="list-group mb-3">
+            @foreach (var mistnost in mistnosti)
+            {
+                <a href="/chat/@WebUtility.UrlEncode(mistnost)"
+                    class="list-group-item list-group-item-action">@mistnost</a>
+            }
+        </div>
+
+        <form>
+            <p>
+                Nová místnost:
+                <input type="text" @bind="NovaMistnost" @ref="NovaMistnostInput" />
+            <button type="submit" @onclick="VytvoritMistnost" class="btn btn-primary"
+                @onclick:preventDefault>Vytvořit</button>
+            </p>
+        </form>
+    }
+</div>
+
+@code {
+    ElementReference PrezdivkaInput;
+    ElementReference NovaMistnostInput;
+    public string Prezdivka { get; set; }
+    public string NovaMistnost { get; set; }
+    List<string> mistnosti;
+
+    protected override void OnInitialized()
+    {
+        mistnosti = ChatService.Aktualni.Mistnosti();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        try
+        {
+            var prezdivkaResult = await Storage.GetAsync<string>("chat", "nick");
+            if (prezdivkaResult.Success)
+            {
+                Prezdivka = prezdivkaResult.Value;
+                StateHasChanged();
+            }
+        }
+        catch { }
+
+        if (firstRender)
+            if (String.IsNullOrEmpty(Prezdivka))
+                await PrezdivkaInput.FocusAsync();
+            else
+                await NovaMistnostInput.FocusAsync();
+    }
+
+    async void UlozitPrezdivku()
+    {
+        if (!String.IsNullOrEmpty(Prezdivka))
+            await Storage.SetAsync("chat", "nick", Prezdivka);
+    }
+
+    void VytvoritMistnost()
+    {
+        if (String.IsNullOrEmpty(NovaMistnost) || String.IsNullOrEmpty(Prezdivka))
+            return;
+        var ok = ChatService.Aktualni.VytvoritMistnost(NovaMistnost);
+        if (ok != null)
+            NavigationManger.NavigateTo($"/chat/{WebUtility.UrlEncode(NovaMistnost)}", true);
+    }
+}

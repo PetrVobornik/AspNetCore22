@@ -1,0 +1,106 @@
+﻿@page "/chat/{Mistnost}"
+
+<PageTitle>@Mistnost</PageTitle>
+
+@inject ProtectedLocalStorage Storage
+@inject NavigationManager NavigationManger
+
+@if (zpravy == null)
+{
+    <p>Načítám...</p>
+} else
+{
+    <div class="row d-felx justify-content-center">
+    <div class="col-md-8 col-lg-6 col-xl-4 vh-100">
+
+    <div class="card h-75">
+        <div class="card-header d-flex justify-content-between align-items-center p-3">
+            <h5 class="mb-0">@Mistnost</h5>
+	        <div class="d-flex flex-row align-items-center">
+	            <a href="/" class="fas fa-times text-muted fa-xs">zpět</a>
+	        </div>
+        </div>
+        
+        <div class="card-body position-relative overflow-y-auto d-flex flex-column-reverse">
+            @foreach (var zprava in zpravy.OrderByDescending(x => x.Datum))
+            {
+                bool sndr = zprava.Odesilatel == prezdivka;
+
+                <div>
+	                <div class="d-flex justify-content-between @(sndr ? "flex-row-reverse" : "")">
+                        <p class="small mb-1">@zprava.Odesilatel</p>
+                        <p class="small mb-1 text-muted">@zprava.Datum.ToString("HH:mm:ss")</p>
+	                </div>
+	                <div class="d-flex flex-row @(sndr ? "flex-row-reverse" : "") mb-4 pt-1 ">
+                        <img src="@Gravatar.ImgSrc(zprava.Odesilatel)" alt="@zprava.Odesilatel" style="width: 50px; height: 100%;" />
+	                    <div>
+	                        <p class="small p-2 mb-3 rounded-3 
+	                            @(sndr ? "me-3 bg-info text-black" : "ms-3 bg-secondary text-white")">@zprava.Text</p>
+	                    </div>
+	                </div>
+	            </div>
+            }
+        </div>
+    </div>
+
+    <form>
+	    <div class="card-footer text-muted d-flex justify-content-start align-items-center p-3">
+	        <div class="input-group mb-0">
+	            <input type="text" class="form-control" placeholder="Zpráva" 
+	                @bind="zprava" autofocus="true" @ref="zpravaInput" />
+	            <button class="btn btn-primary" type="submit" 
+	                style="padding-top: 0.55rem;" 
+	                @onclick="Odeslat" @onclick:preventDefault>Odeslat</button>
+	        </div>
+	    </div>
+	</form>
+
+    </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public string? Mistnost { get; set; }
+    ElementReference zpravaInput;
+    string zprava;
+    ObservableCollection<Zprava> zpravy;
+    string? prezdivka;
+
+    protected override void OnInitialized()
+    {
+        if (!String.IsNullOrEmpty(Mistnost))
+            zpravy = ChatService.Aktualni.Zpravy(WebUtility.UrlDecode(Mistnost));
+        if (zpravy == null)
+            NavigationManger.NavigateTo("/");
+        else
+            zpravy.CollectionChanged += ZmenaZprav;
+    }
+
+    public void ZmenaZprav(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        var prezdivkaResult = await Storage.GetAsync<string>("chat", "nick");
+        if (prezdivkaResult.Success)
+        {
+            prezdivka = prezdivkaResult.Value;
+            StateHasChanged();
+        }
+
+        if (String.IsNullOrEmpty(prezdivka))
+            NavigationManger.NavigateTo("/");
+
+        if (firstRender)
+            await zpravaInput.FocusAsync();
+    }
+
+    void Odeslat()
+    {
+        ChatService.Aktualni.Odeslat(WebUtility.UrlDecode(Mistnost) ?? "", prezdivka, zprava);
+        zprava = "";
+    }
+}
