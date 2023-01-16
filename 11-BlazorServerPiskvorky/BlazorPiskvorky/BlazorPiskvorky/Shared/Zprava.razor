@@ -1,0 +1,28 @@
+﻿<div class="alert alert-@zpravaTyp @zpravaViditelnost alert-dismissible fade show position-fixed bottom-0 start-50 translate-middle" role="alert">
+    @zpravaText
+    <button type="button" class="btn-close" 
+            data-bs-dismiss="alert" aria-label="Zavřít"
+            @onclick="Skryt"></button>
+</div>
+
+@code {
+    public enum TypZpravy { Info, Success, Danger, Warning }
+
+    string zpravaText = "Načítám...",
+           zpravaTyp = "info",
+           zpravaViditelnost = "visible";
+
+    public void Zobrazit(string message, TypZpravy type)
+    {
+        zpravaText = message;
+        zpravaTyp = type.ToString().ToLower();
+        zpravaViditelnost = "visible";
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Skryt()
+    {
+        zpravaViditelnost = "invisible";
+        InvokeAsync(StateHasChanged);
+    }
+}
