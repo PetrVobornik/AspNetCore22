@@ -15,10 +15,10 @@ public class HerniData
     public TypSymbolu[,] Plocha { get; init; }
     public byte VelikostPlochy { get; init; }
     public TypSymbolu AktualniHrac { get; private set; } = TypSymbolu.X;
-    public StavHry Stav { get; private set; }
+    public StavHry Stav { get; private set; } = StavHry.Probiha;
     public List<Pos> ViteznaRada { get; private set; }
-    public event SymbolZmenenDelegate SymbolZmenen;
 
+    public event SymbolZmenenDelegate SymbolZmenen;
 
     public HerniData(byte velikostPlochy)
     {
@@ -38,29 +38,29 @@ public class HerniData
 
     StavHry KontrolaStavu(byte i, byte j)
     {
-        var prohledavaneSmery = new[] {
-             new { X = 1, Y = 0 },
-             new { X = 1, Y = 1 },
-             new { X = 0, Y = 1 },
-             new { X = -1, Y = 1 },
-             };
         var rada = new List<Pos>();
-        foreach (var sd in prohledavaneSmery)
+        var prohledavaneSmery = new[]
+        {
+            new { X = 1, Y = 0 },
+            new { X = 1, Y = 1 },
+            new { X = 0, Y = 1 },
+            new { X = -1, Y = 1 },
+        };
+        foreach (var ps in prohledavaneSmery)
         {
             rada.Clear();
             rada.Add(new Pos(i, j));
             for (sbyte znamenko = -1; znamenko <= 1; znamenko += 2)
             {
                 int k = znamenko, y = 0, x = 0;
-                while ((y = i + k * sd.Y) >= 0 && y < VelikostPlochy &&
-                       (x = j + k * sd.X) >= 0 && x < VelikostPlochy &&
+                while ((y = i + k * ps.Y) >= 0 && y < VelikostPlochy &&
+                       (x = j + k * ps.X) >= 0 && x < VelikostPlochy &&
                        Plocha[y, x] == AktualniHrac)
                 {
                     k += znamenko;
                     rada.Add(new Pos((byte)y, (byte)x));
                 }
             }
-
             if (rada.Count >= 5)
             {
                 ViteznaRada = rada;

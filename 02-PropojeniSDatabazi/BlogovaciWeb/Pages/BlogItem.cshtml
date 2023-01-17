@@ -88,7 +88,7 @@
             <label class="form-label" for="text">Váš komentář</label>
             <textarea name="text" id="text" class="form-control mx-auto" rows="3"></textarea>
             <div id="reaguje">Reagujete na příspěvek od <span id="reakce_koho"></span> z <span id="reakce_kdy"></span>.</div>
-            <div class="mt-3 gap-3 d-grid d-flex justify-content-end">
+            <div class="mt-3 gap-3 d-flex justify-content-end">
                 <button type="submit" class="btn btn-primary me-2">Odelsat</button>
                 <button type="button" class="btn btn-outline-danger" onclick="HideComment()">Zrušit</button>
             </div>
@@ -110,7 +110,6 @@
                 $("#reakce_kdy").text(kdy);
                 $("#reaguje").show();
             }
-            $('body').scrollTo("#komentar");
         }
         function HideComment() {
             $("#komentar").hide();

@@ -4,7 +4,7 @@
 @inject ProtectedLocalStorage Storage
 @inject IJSRuntime JSRuntime
 
-<PageTitle>Piškvorky hra</PageTitle>
+<PageTitle>Piškvorky - hra</PageTitle>
 
 @if (Hrac == TypSymbolu.Nic)
 {
@@ -13,38 +13,36 @@
 else
 {
     <div class="hra mt-5 mx-auto">
-        <div class="plocha" 
-             style="grid-template-columns: repeat(@DataHry.VelikostPlochy, 1fr)">
+        <div class="plocha" style="grid-template-columns: repeat(@DataHry.VelikostPlochy, 1fr)">
             @for (byte i = 0; i < DataHry.VelikostPlochy; i++)
                 @for (byte j = 0; j < DataHry.VelikostPlochy; j++)
                 {
                     <Policko Radek="i" Sloupec="j" HraControl="this" />
                 }
         </div>
-
         <div class="info mt-4 w-100">
-            <div class="float-start @stylViditelnostAktualnihoHrace">
-                Aktuální hráč: <Policko Symbol="DataHry.AktualniHrac" @ref="aktualniHrac" />
+            <div class="float-start @stylViditelnostAktuaniHrac">
+                Aktulání hráč: <Policko Symbol="DataHry.AktualniHrac" @ref="aktualniHrac" />
             </div>
             <div class="float-end">
                 Váš symbol: <Policko Symbol="Hrac" />
             </div>
-           @if (Hrac == TypSymbolu.X)
-           {
-               <br />
-               <button type="button" class="btn @stylBtnSdilet float-none mt-4 w-100 mx-auto"
-                   @onclick="KopirovatOdkaz">
-                   <svg viewBox="0 0 12 12" class="me-3">
-                       <ellipse cx="9" cy="3" rx="2" ry="2" />
-                       <ellipse cx="3" cy="6" rx="2" ry="2" />
-                       <ellipse cx="9" cy="9" rx="2" ry="2" />
-                       <line x1="9" y1="3" x2="3" y2="6" stroke="black" />
-                       <line x1="9" y1="9" x2="3" y2="6" stroke="black" />
-                   </svg>
-                   Zkopírovat adresu pro připojení do schránky
-               </button>
-           }
+            @if (Hrac == TypSymbolu.X)
+            {
+                <br />
+                <button type="button" class="btn @stylBtnSdilet float-none mt-4 w-100 mx-auto"
+                @onclick="KopirovatOdkaz">
+                    <svg viewBox="0 0 12 12">
+                        <ellipse cx="9" cy="3" rx="2" ry="2" />
+                        <ellipse cx="3" cy="6" rx="2" ry="2" />
+                        <ellipse cx="9" cy="9" rx="2" ry="2" />
+                        <line x1="9" y1="3" x2="3" y2="6" stroke="black" />
+                        <line x1="9" y1="9" x2="3" y2="6" stroke="black" />
+                    </svg> Zkopírovat akdresu pro připojení do schránky
+                </button>
+            }
         </div>
+
     </div>
 }
 
@@ -55,11 +53,11 @@ else
     public string KodHry { get; set; }
     internal HerniData DataHry { get; private set; }
     internal Policko[,] MapaPoli { get; private set; }
-    internal TypSymbolu Hrac { get; private set; } = TypSymbolu.Nic;
-    internal Zprava ZpravaControl { get; set; }
-    string stylViditelnostAktualnihoHrace = "visible";
-    string stylBtnSdilet = "btn-primary";
+    internal TypSymbolu Hrac { get; private set; }
     Policko aktualniHrac;
+    public Zprava ZpravaControl { get; set; }
+    string stylViditelnostAktuaniHrac = "visible";
+    string stylBtnSdilet = "btn-primary";
 
     protected override void OnInitialized()
     {
@@ -70,14 +68,11 @@ else
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!firstRender)
-            return;
+        if (!firstRender) return;
         MapaPoli = new Policko[DataHry.VelikostPlochy, DataHry.VelikostPlochy];
         var kodHryResult = await Storage.GetAsync<string>(KodHry);
         if (kodHryResult.Success)
-        {
             Hrac = Enum.Parse<TypSymbolu>(kodHryResult.Value);
-        } 
         else
         {
             Hrac = TypSymbolu.O;
@@ -85,7 +80,7 @@ else
         }
         DataHry.SymbolZmenen += SymbolZmenen;
         if (DataHry.Stav != StavHry.Probiha)
-            stylViditelnostAktualnihoHrace = "invisible";
+            stylViditelnostAktuaniHrac = "invisible";
         ZpravaControl.Skryt();
         StateHasChanged();
         foreach (var p in MapaPoli)
@@ -100,13 +95,11 @@ else
             p.Uzamknuto = Hrac != DataHry.AktualniHrac || DataHry.Stav != StavHry.Probiha;
 
         if (DataHry.Stav == StavHry.Remiza)
-        {
             ZpravaControl.Zobrazit("Remíza!", Zprava.TypZpravy.Warning);
-        }
         else if (DataHry.ViteznaRada != null)
         {
             bool vyhra = Hrac == TypSymbolu.X && DataHry.Stav == StavHry.VyhralX ||
-                            Hrac == TypSymbolu.O && DataHry.Stav == StavHry.VyhralO;
+                         Hrac == TypSymbolu.O && DataHry.Stav == StavHry.VyhralO;
             foreach (var pos in DataHry.ViteznaRada)
                 MapaPoli[pos.Y, pos.X].Zvyraznit(vyhra);
             if (vyhra)
@@ -116,9 +109,10 @@ else
         }
         if (DataHry.Stav != StavHry.Probiha)
         {
-            stylViditelnostAktualnihoHrace = "invisible";
+            stylViditelnostAktuaniHrac = "invisible";
             InvokeAsync(StateHasChanged);
         }
+
         aktualniHrac.ZmenaSymbolu(DataHry.AktualniHrac);
     }
 
@@ -133,7 +127,8 @@ else
         }
         catch
         {
-            ZpravaControl.Zobrazit("Adresu se nepodařilo zkopírovat do schránky. Pošlete protihráči aktuální adresu této stránky, aby se mohl připojit do hře.", Zprava.TypZpravy.Warning);
+            ZpravaControl.Zobrazit("Adresu se nepodařilo zkopírovat do schránky. Pošlete protihráči aktuální adresu této stránky, aby se mohl připojit ke hře.", Zprava.TypZpravy.Warning);
         }
     }
+
 }

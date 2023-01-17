@@ -1,25 +1,21 @@
 ﻿@page "/"
-@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 
 @inject NavigationManager NavigationManager
 @inject ProtectedLocalStorage Storage
 
 <PageTitle>Piškvorky</PageTitle>
 
-
 <div class="container">
     <h1>Piškvorky</h1>
     <form>
-        <label>
-            Velikost herní plochy:<br />
+        <label>Velikost herní plochy<br />
             <input type="number" inputmode="numeric"
                    @bind="velikostPlochy" class="form-control" />
         </label>
         <button type="button" class="btn btn-primary"
-                @onclick="VytvoritHru">
-            Vytvořit novou hru
-        </button>
+            @onclick="VytvoritHru">Vytvořit novou hru</button>
     </form>
+
 </div>
 
 @code {

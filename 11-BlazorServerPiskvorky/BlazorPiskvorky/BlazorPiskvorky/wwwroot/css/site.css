@@ -16,31 +16,39 @@
     line-height: 0;
     border: 1px solid black;
 }
+
     .policko button, .policko svg {
         display: inline-block;
         width: 2rem;
         height: 2rem;
-        border: 0;
+        border: none;
         text-align: center;
         vertical-align: middle;
     }
-    .policko button:hover {
-        background-color: silver;
-    }
-    .policko.zvyrazneni-vitez {
+
+        .policko button:hover {
+            background-color: silver;
+        }
+
+    .policko.zvyrazneni-vyhra {
         background-color: #AAFFAA;
     }
+
     .policko.zvyrazneni-prohra {
         background-color: #FFAAAA;
     }
 
-.info { }
+.info {
+}
+
     .info div {
         display: inline-block;
     }
-    .info div .policko {
-        border: none;
-    }
+
+        .info div .policko {
+            border: none;
+        }
+
     .info svg {
         width: 1.5rem;
         height: 1.5rem;

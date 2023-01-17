@@ -1,8 +1,9 @@
-﻿<div class="alert alert-@zpravaTyp @zpravaViditelnost alert-dismissible fade show position-fixed bottom-0 start-50 translate-middle" role="alert">
+﻿<div class="alert alert-@zpravaTyp @zpravaViditelnost alert-dismissible fade show position-fixed bottom-0 start-50 translate-middle"
+    role="alert">
     @zpravaText
-    <button type="button" class="btn-close" 
-            data-bs-dismiss="alert" aria-label="Zavřít"
-            @onclick="Skryt"></button>
+    <button type="button" class="btn-close"
+            data-bs-dismiss="alert" aria-lable="Zavřít"
+            @onclick="Skryt"></button>
 </div>
 
 @code {
@@ -12,10 +13,10 @@
            zpravaTyp = "info",
            zpravaViditelnost = "visible";
 
-    public void Zobrazit(string message, TypZpravy type)
+    public void Zobrazit(string zprava, TypZpravy typ)
     {
-        zpravaText = message;
-        zpravaTyp = type.ToString().ToLower();
+        zpravaText = zprava;
+        zpravaTyp = typ.ToString().ToLower();
         zpravaViditelnost = "visible";
         InvokeAsync(StateHasChanged);
     }
