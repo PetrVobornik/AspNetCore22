@@ -33,13 +33,36 @@ public class SpravceHry
         return pozice;
     }
 
-    public Had NovyHad()
+    public Had NovyHad(Had staryHad = null)
     {
-        var had = new Had(this);
+        var had = new Had(this, staryHad);
         lock (Hadi)
+        {
+            if (staryHad != null)
+                Hadi.Remove(staryHad);
             Hadi.Add(had);
+        }
         return had;
     }
 
+    public void Posun()
+    {
+        foreach (var had in Hadi)
+            had.Posun();
+        foreach (var had in Hadi)
+        {
+            if (Hadi?.Any(x => x.Kolize(had.Ocas[0], x == had)) == true)
+            {
+                had.Skoncil = true;
+                had.CasSkonu = DateTime.Now;
+            }
+            else if (had.Ocas[0] == Potrava?.Pozice)
+            {
+                had.Ocas.Add(Potrava.Pozice);
+                Potrava.Umisti();
+            }
+        }
+        Hadi.RemoveAll(x => x.Skoncil && (DateTime.Now - x.CasSkonu).TotalSeconds > 10);
+    }
 
 }

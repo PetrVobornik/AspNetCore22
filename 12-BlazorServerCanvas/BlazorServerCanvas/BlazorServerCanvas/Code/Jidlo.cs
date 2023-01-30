@@ -18,14 +18,6 @@ public class Jidlo
         Pozice = Hra.NahodnaPozicePrazdna();
     }
 
-    //public void ZmenaPlochy(Had had)
-    //{
-    //    if (Pozice.X + had.Velikost > had.Plocha.Width ||
-    //        Pozice.Y + had.Velikost > had.Plocha.Height)
-    //        Umisti(had);
-    //}
-
-
     public bool Kolize(Had had)
         => had.Kolize(Pozice);
 }

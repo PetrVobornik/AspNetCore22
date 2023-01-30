@@ -15,7 +15,8 @@
 @code {
     BECanvasComponent canvas;
     Canvas2DContext ctx;
-    DateTime casPosledniObnovy;
+    static DateTime casPosledniObnovy;
+    DateTime casPosledniObnovyLocal;
     SpravceHry hra;
     Had had;
     Jidlo jidlo => hra.Potrava;
@@ -45,44 +46,31 @@
         else if (e.Code == "ArrowRight" || e.Code == "KeyD") had.Smer = new Point(1, 0);
         else if (e.Code == "Space" || e.Key == "Enter")
         {
-            //if (had.Skoncil)
-            //    had = new Had(had.Plocha, had.Velikost);
-            //else
-            //    had.Smer = new Point(0, 0);
+            if (had.Skoncil)
+            {
+                had = hra.NovyHad(had);
+            }
+            else
+                had.Smer = new Point(0, 0);
         }
     }
-
-    //[JSInvokable]
-    //public void ZmenaVelikosti(double width, double height)
-    //{
-    //    var plocha = new Size((int)width, (int)height);
-    //    if (had == null)
-    //        had = new Had(plocha);
-    //    else
-    //        had.ZmenaPlochy(plocha);
-    //    jidlo?.ZmenaPlochy(had);
-    //}
 
     [JSInvokable]
     public async ValueTask ObnovaHry(float timeStamp)
     {
-        if ((DateTime.Now - casPosledniObnovy).TotalMilliseconds < 50) return;
-        casPosledniObnovy = DateTime.Now;
-
-        // Poprvé
-        //if (had == null)
-        //    had = new Had(new Size((int)canvas.Width, (int)canvas.Height));
-        //if (jidlo == null)
-        //    jidlo = new Jidlo(had);
-
-        // Posun hada
-        had.Posun();
-        // Snězení jídla
-        if (jidlo.Kolize(had))
+        // Globální posun všech hadů (jen 1x)
+        lock (hra)
         {
-            had.Ocas.Add(jidlo.Pozice);
-            jidlo.Umisti();
+            if ((DateTime.Now - casPosledniObnovy).TotalMilliseconds >= 150)
+            {
+                hra.Posun();
+                casPosledniObnovy = DateTime.Now;
+            }
         }
+        // Lokální překreslení (jednou za 150ms)
+        if ((DateTime.Now - casPosledniObnovyLocal).TotalMilliseconds < 150) return;
+        casPosledniObnovyLocal = DateTime.Now;
+
 
         // Vykreslení
         await ctx.BeginBatchAsync();
@@ -103,22 +91,21 @@
 
         foreach (var had in hra.Hadi)
         {
-
             // Had
-            await ctx.SetFillStyleAsync("#00FF00");
+            await ctx.SetFillStyleAsync(Utils.ColorToHex(had.BarvaOcasu));
             for (int i = 1; i < had.Ocas.Count; i++)
                 await ctx.FillRectAsync(had.Ocas[i].X + 1, had.Ocas[i].Y + 1,
                                         had.Velikost - 1, had.Velikost - 1);
             // Hlava hada
-            await ctx.SetFillStyleAsync(had.Skoncil ? "#FFAAAA" : "#00FFFF");
+            await ctx.SetFillStyleAsync(had.Skoncil ? "#FFAAAA" : Utils.ColorToHex(had.BarvaHlavy));
             await ctx.FillRectAsync(had.Ocas[0].X + 1, had.Ocas[0].Y + 1,
                                         had.Velikost - 1, had.Velikost - 1);
-        }
-
-        // Score
-        await ctx.SetFontAsync("26px Segoe UI");
-        await ctx.SetFillStyleAsync("#FFFFFF");
-        await ctx.FillTextAsync($"{had.Ocas.Count - 1}", 10, 30);
+            // Score
+            await ctx.SetFontAsync("26px Segoe UI");
+            await ctx.SetFillStyleAsync(Utils.ColorToHex(had.BarvaHlavy));
+            await ctx.FillTextAsync($"{had.Ocas.Count - 1}", 10, 
+                30 + hra.Hadi.IndexOf(had) * 30);
+        }      
 
         await ctx.EndBatchAsync();
     }

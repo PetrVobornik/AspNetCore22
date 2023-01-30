@@ -10,12 +10,20 @@ public class Had
     public SpravceHry Hra { get; set; }
     public Size Plocha => Hra.Plocha;
     public int Velikost => Hra.Velikost;
+    public Color BarvaHlavy { get; init; }
+    public Color BarvaOcasu { get; init; }
+    public DateTime CasSkonu { get; set; }
 
 
-    public Had(SpravceHry hra)
+    public Had(SpravceHry hra, Had staryHad = null)
     {
         Hra = hra;
         Smer = new Point(0, 0);
+        if (staryHad == null)
+            BarvaHlavy = Color.FromArgb(Random.Shared.Next(256), Random.Shared.Next(256), Random.Shared.Next(256));
+        else
+            BarvaHlavy = staryHad.BarvaHlavy;
+        BarvaOcasu = Color.FromArgb((int)(BarvaHlavy.R * 0.8), (int)(BarvaHlavy.G * 0.8), (int)(BarvaHlavy.B * 0.8));
         Ocas = new List<Point>() { Hra.NahodnaPozicePrazdna() };
     }
 
@@ -28,29 +36,13 @@ public class Had
         // Nekonečná plocha
         if (novaPozice.X < 0) novaPozice.X = (Plocha.Width / Velikost - 1) * Velikost;
         if (novaPozice.Y < 0) novaPozice.Y = (Plocha.Height / Velikost - 1) * Velikost;
-        if (novaPozice.X > Plocha.Width) novaPozice.X = 0;
-        if (novaPozice.Y > Plocha.Height) novaPozice.Y = 0;
-        // Kontrola srážk s vlastním ocasem
-        if (Kolize(novaPozice))
-            Skoncil = true;
+        if (novaPozice.X >= Plocha.Width) novaPozice.X = 0;
+        if (novaPozice.Y >= Plocha.Height) novaPozice.Y = 0;
         // Posun všech částí
         Ocas.Insert(0, novaPozice);
         Ocas.RemoveAt(Ocas.Count - 1);
     }
 
-    //public void ZmenaPlochy(Size novaPlocha)
-    //{
-    //    Plocha = novaPlocha;
-    //    if (Ocas.Any(o => o.X + Velikost > novaPlocha.Width ||
-    //                      o.X + Velikost > novaPlocha.Width))
-    //    {
-    //        Ocas.Clear();
-    //        Ocas.Add(NahodnaPozice());
-    //        Smer = Point.Empty;
-    //    }
-    //}
-
-
-    public bool Kolize(Point pozice)
-        => Ocas.Any(o => o == pozice);
+    public bool Kolize(Point pozice, bool vynechatHlavu = false)
+        => (vynechatHlavu ? Ocas.Skip(1) : Ocas).Any(o => o == pozice);
 }
