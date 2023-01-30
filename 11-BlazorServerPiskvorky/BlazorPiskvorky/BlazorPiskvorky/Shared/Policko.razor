@@ -1,6 +1,6 @@
 ﻿@inherits ComponentBase
 
-<div class="policko @CssTridaPolicka">
+<div class="policko @CssTridaPolicko">
     @switch (Symbol)
     {
         case TypSymbolu.Nic:
@@ -25,14 +25,14 @@
     [Parameter]
     public TypSymbolu Symbol { get; set; }
     [Parameter]
-    public byte Radek { get; set; }
+    public byte Radek { get; init; }
     [Parameter]
-    public byte Sloupec { get; set; }
+    public byte Sloupec { get; init; }
     [Parameter]
     public Hra HraControl { get; set; }
 
     public bool Uzamknuto { get; set; }
-    string CssTridaPolicka { get; set; }
+    string CssTridaPolicko { get; set; }
 
     protected override void OnInitialized()
     {
@@ -57,14 +57,13 @@
     public void ZmenaSymbolu(TypSymbolu symbol)
     {
         Symbol = symbol;
-        if (HraControl?.DataHry is null || HraControl.DataHry.Stav == StavHry.Probiha)
-            InvokeAsync(StateHasChanged);
+        InvokeAsync(StateHasChanged);
         HraControl?.ZpravaControl.Skryt();
     }
 
     public void Zvyraznit(bool vyhra)
     {
-        CssTridaPolicka = vyhra ? "zvyrazneni-vitez" : "zvyrazneni-prohra";
+        CssTridaPolicko = vyhra ? "zvyrazneni-vyhra" : "zvyrazneni-prohra";
         InvokeAsync(StateHasChanged);
     }
 }
