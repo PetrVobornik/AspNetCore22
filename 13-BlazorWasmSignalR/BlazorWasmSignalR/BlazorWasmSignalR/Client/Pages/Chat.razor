@@ -1,0 +1,68 @@
+﻿@page "/chat"
+@using Microsoft.AspNetCore.Authorization;
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
+@using Microsoft.AspNetCore.SignalR.Client;
+
+@attribute [Authorize]
+@implements IDisposable
+@inject NavigationManager Navigace
+@inject IAccessTokenProvider AccessTokenProvider
+
+<div>
+    <label class="form-label">Adresát: 
+        <input @bind="adresat" class="form-control" />
+    </label>
+</div>
+<div>
+    <label class="form-label">Zpráva: 
+        <input @bind="zprava" class="form-control" size="50" />
+    </label>
+</div>
+<button class="btn btn-primary" @onclick="Odeslat" 
+    disabled="@(!JeSpojeni)">Odeslat</button>
+
+<hr />
+<ul>
+    @foreach (var zprava in zpravy)
+    {
+        <li>@zprava</li>
+    }
+</ul>
+
+
+@code {
+    string adresat, zprava;
+    List<string> zpravy = new List<string>();
+    HubConnection spojeni;
+
+    protected override async Task OnInitializedAsync()
+    {
+        spojeni = new HubConnectionBuilder()
+            .WithUrl(Navigace.ToAbsoluteUri("/chathub"), options =>
+            {
+                options.AccessTokenProvider = async () =>
+                {
+                    var accessTokenResult = await AccessTokenProvider.RequestAccessToken();
+                    accessTokenResult.TryGetToken(out var accessToken);
+                    return accessToken.Value;
+                };                    }).Build();
+        spojeni.On<string, string>("PrijmoutZpravu", (odesilatel, zprava) =>
+        {
+            var textZpravy = $"{odesilatel}: {zprava}";
+            zpravy.Add(textZpravy);
+            StateHasChanged();
+        });
+        await spojeni.StartAsync();
+    }
+
+    Task Odeslat()
+        => spojeni.SendAsync("OdeslatZpravu", adresat, zprava);
+
+    bool JeSpojeni 
+        => spojeni?.State == HubConnectionState.Connected;
+
+    public void Dispose()
+    {
+        spojeni.DisposeAsync();
+    }
+}
