@@ -16,7 +16,7 @@
     BECanvasComponent canvas;
     Canvas2DContext ctx;
     static DateTime casPosledniObnovy;
-    DateTime casPosledniObnovyLocal;
+    DateTime casPoslednihoVykresleni;
     SpravceHry hra;
     Had had;
     Jidlo jidlo => hra.Potrava;
@@ -47,9 +47,7 @@
         else if (e.Code == "Space" || e.Key == "Enter")
         {
             if (had.Skoncil)
-            {
                 had = hra.NovyHad(had);
-            }
             else
                 had.Smer = new Point(0, 0);
         }
@@ -58,55 +56,50 @@
     [JSInvokable]
     public async ValueTask ObnovaHry(float timeStamp)
     {
-        // Globální posun všech hadů (jen 1x)
-        lock (hra)
-        {
-            if ((DateTime.Now - casPosledniObnovy).TotalMilliseconds >= 150)
-            {
-                hra.Posun();
-                casPosledniObnovy = DateTime.Now;
-            }
-        }
+        hra.Update();
+
         // Lokální překreslení (jednou za 150ms)
-        if ((DateTime.Now - casPosledniObnovyLocal).TotalMilliseconds < 150) return;
-        casPosledniObnovyLocal = DateTime.Now;
+        if ((DateTime.Now - casPoslednihoVykresleni).TotalMilliseconds <= 1000/hra.FPS) 
+            return;
+        casPoslednihoVykresleni = DateTime.Now;
 
 
         // Vykreslení
         await ctx.BeginBatchAsync();
 
         // Vyčistit plochu
-        await ctx.ClearRectAsync(0, 0, had.Plocha.Width, had.Plocha.Height);
+        await ctx.ClearRectAsync(0, 0, hra.Plocha.Width, hra.Plocha.Height);
         await ctx.SetFillStyleAsync("#000000");
-        await ctx.FillRectAsync(0, 0, had.Plocha.Width, had.Plocha.Height);
+        await ctx.FillRectAsync(0, 0, hra.Plocha.Width, hra.Plocha.Height);
 
         // Jídlo
         await ctx.BeginPathAsync();
         await ctx.SetFillStyleAsync("#FF0000");
-        await ctx.ArcAsync(jidlo.Pozice.X + had.Velikost / 2,
-                           jidlo.Pozice.Y + had.Velikost / 2,
-                           had.Velikost / 2, 0, 2 * Math.PI);
+        await ctx.ArcAsync(jidlo.Pozice.X + hra.Velikost / 2,
+                           jidlo.Pozice.Y + hra.Velikost / 2,
+                           hra.Velikost / 2, 0, 2 * Math.PI);
         await ctx.FillAsync();
         await ctx.ClosePathAsync();
 
         foreach (var had in hra.Hadi)
         {
-            // Had
-            await ctx.SetFillStyleAsync(Utils.ColorToHex(had.BarvaOcasu));
+            // Ocas hada
+            await ctx.SetFillStyleAsync(had.BarvaOcasu.Hexadecimalne());
             for (int i = 1; i < had.Ocas.Count; i++)
                 await ctx.FillRectAsync(had.Ocas[i].X + 1, had.Ocas[i].Y + 1,
-                                        had.Velikost - 1, had.Velikost - 1);
+                                        hra.Velikost - 1, hra.Velikost - 1);
             // Hlava hada
-            await ctx.SetFillStyleAsync(had.Skoncil ? "#FFAAAA" : Utils.ColorToHex(had.BarvaHlavy));
+            await ctx.SetFillStyleAsync(had.Skoncil ? "#FFAAAA" : had.BarvaHlavy.Hexadecimalne());
             await ctx.FillRectAsync(had.Ocas[0].X + 1, had.Ocas[0].Y + 1,
-                                        had.Velikost - 1, had.Velikost - 1);
-            // Score
+                                        hra.Velikost - 1, hra.Velikost - 1);
+            // Score hadů
             await ctx.SetFontAsync("26px Segoe UI");
-            await ctx.SetFillStyleAsync(Utils.ColorToHex(had.BarvaHlavy));
+            await ctx.SetFillStyleAsync(had.BarvaHlavy.Hexadecimalne());
             await ctx.FillTextAsync($"{had.Ocas.Count - 1}", 10, 
                 30 + hra.Hadi.IndexOf(had) * 30);
         }      
 
+        // Kreslení ukončeno
         await ctx.EndBatchAsync();
     }
 }
